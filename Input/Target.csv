@@ -1,0 +1,14 @@
+m1 (in solar masses), 60
+m2 (in solar masses),40
+Chi_1x, 0.7
+Chi_1y, -0.4
+Chi_1z, 0.4
+Chi_2x, 0.0
+Chi_2y, 0.0
+Chi_2z, 0.9
+r (in parsecs), 1e6
+incl, 0
+PhiRef, 0
+LongAscNodes, 0
+Polarization, 0
+Approximant_target,IMRPhenomTPHM
