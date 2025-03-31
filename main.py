@@ -227,6 +227,7 @@ def main_optimization_intrinsic():
     print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds.", "magenta"))
 
 
+    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
 
     # Obtaining the values for representing the Gravitational Wave
     masses_final = func.M_c_and_q_m(prms_final[0], prms_final[1])
@@ -234,10 +235,10 @@ def main_optimization_intrinsic():
     spin1x_final, spin1y_final = func.spin1p_mod_and_angle(prms_final[4],prms_final[5])
 
     # Waveforms Coaligned 
-
     optimized_params = params(masses_final, (spin1x_final,spin1y_final,spin1z_final), (0,0,spin2z_final))
     hp_test, hc_test, time_test = simulationTD(optimized_params)
-    h_test = hp_test # TODO
+    h_test = hp_test*math.cos(Info_target[gl_var.n_target][2]) + hc_test*math.sin(Info_target[gl_var.n_target][2]) 
+
     h1_aligned, h2_aligned = coalign_waveforms(h_target[gl_var.n_target], TimeSeries(h_test, delta_t=delta_T))
 
     # Plot of the coaligned waveforms
@@ -251,6 +252,7 @@ def main_optimization_intrinsic():
     plt.savefig('./Graphics/main_intrinsic.png', bbox_inches='tight') 
     #plt.show() 
 
+    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
 
     return max_match, Comp_time, prms_final
 
@@ -344,6 +346,7 @@ def main_optimization_full():
     print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds.", "magenta"))
 
 
+    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
 
     # Obtaining the parameters to plot the gravitational Waveforms
     masses_final = func.M_c_and_q_m(prms_final[0], prms_final[1])
@@ -351,7 +354,6 @@ def main_optimization_full():
     spin1x_final, spin1y_final = func.spin1p_mod_and_angle(prms_final[4], prms_final[5])
 
     # Waveforms Coaligned 
-
     optimized_params = params(masses_final, (spin1x_final, spin1y_final, spin1z_final), (0,0,spin2z_final),
                                                        incl=prms_final[6], longAscNodes=prms_final[7])
     optimized_pol = prms_final[8]
@@ -371,6 +373,8 @@ def main_optimization_full():
     plt.legend()
     plt.savefig('./Graphics/main_full.png', bbox_inches='tight') 
     #plt.show() 
+
+    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
 
     return max_match, Comp_time, prms_final
 

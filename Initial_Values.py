@@ -116,7 +116,7 @@ elif Target_Form == "NR_file":
 
     NRfile = "q1a02t30_T_96_384.h5", "q2a02t30dP0dRm75_T_96_384.h5" # Filename with a NR waveform 
 
-    NRfile = "./Mismatch_test/" + NRfile[0] # TODO Cambiar la carpeta de Mismatch_test a NRfiles
+    NRfile = "./Input/NR_files" + NRfile[0] 
 
     #------------------------------------------
     mtotal = 60
