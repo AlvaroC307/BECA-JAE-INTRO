@@ -10,7 +10,7 @@ from Initial_Values import Spherical_Modes
 from Initial_Values import delta_T, f_min, f_ref, Info_target, Approximant_opt # Import the necessary parameters of the GW
 # We import parameters_target so that we can compute the target GW and call it as a global function whenever we need it
 
-def Choose_modes():
+def Choose_modes(): # Function to generate waveform_params using the choosen Spherical modes 
 
     if Spherical_Modes == "All":
         waveform_params = None
@@ -56,10 +56,11 @@ def simulationTD(parameters: params)->tuple:
     return h_plus, h_cross, time # The data is returned as Numpy arrays, we lost information of the epoch, etc which we won't use in this example
 
 
-def simulationTD_target(Approximant:str, parameters: params)->tuple:
+def simulationTD_target(Approximant, parameters: params)->tuple:
     """Simulation of a binary system using the approximant IMRPhenomTPHM
 
     Args:
+        Approximant : The chosen approximant 
         parameters (params): A class with all the mandatory parameters needed to compute the GW
 
     Returns:
@@ -84,7 +85,7 @@ def simulationTD_target(Approximant:str, parameters: params)->tuple:
 
 # Computation of the target gravitational wave to use it as a global function
 
-h_target = []
+h_target = [] # h_target is a list that contains all the TimeSeries for which we want to determine a Fitting Factor.
 for Info in Info_target: 
 
     Approximant_target = Info[0]
