@@ -4,7 +4,6 @@ import time
 from pycbc.types import TimeSeries
 import nlopt
 import csv
-from joblib import Parallel, delayed
 import matplotlib.pyplot as plt 
 from termcolor import colored
 
@@ -323,11 +322,17 @@ def main_optimization_full():
     LongAscNodes_template = [0, math.pi/4, 0, math.pi/4, 0, math.pi/4]
     pol_template = [0, 0, math.pi/4, math.pi/4, math.pi/4, 0] 
 
+    print(prms_final) # DEBUGGING
+    print(n_workers) # DEBUGGING
+
     prms_initial = []
     for i in range(n_workers):
+        print(i) # DEBUGGING
         prms_initial.append([prms_final[0], prms_final[1], prms_final[2],
                             prms_final[3], prms_final[4], anglespin1_template[i],
                             prms_final[5], LongAscNodes_template[i], pol_template[i]]) # Create the templates
+
+    print(prms_initial) # DEBUGGING
 
     max_match = 0
     for prms in prms_initial:
@@ -391,7 +396,8 @@ def main(): # Main Function. It executes main_optimization_full or main_optimiza
                 Comp_time.append(results[1])
                 prms_final.append(results[2]) 
 
-                gl_var.n_target+=1
+                gl_var.n_target+=1 
+                print(f"The {gl_var.n_target + gl_var.n_aprox_opt*len(Info_target)} optimization has been completed.")
 
             gl_var.n_aprox_opt+=1
             gl_var.n_target = 0
@@ -405,6 +411,7 @@ def main(): # Main Function. It executes main_optimization_full or main_optimiza
                 prms_final.append(results[2])
 
                 gl_var.n_target+=1
+                print(f"The {gl_var.n_target + gl_var.n_aprox_opt*len(Info_target)} optimization has been completed.")
 
             gl_var.n_aprox_opt +=1
             gl_var.n_target = 0
@@ -419,7 +426,7 @@ if __name__ == '__main__':
 
     if Intrinsic_or_Extrinsic == "Extrinsic":
 
-        file_test = open('./Data/Testing_Full.csv', "w", newline="")
+        file_test = open('./Data/Testing_Full.csv', "a", newline="")
         csv_test = csv.writer(file_test)
 
         csv_test.writerow(["FF","T_comp","Q","M_c", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", "incl", "longascnodes", "pol", 

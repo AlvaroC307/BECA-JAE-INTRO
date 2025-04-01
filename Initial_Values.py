@@ -36,7 +36,7 @@ Target_Form = Target_Form[2]
 Intrinsic_or_Extrinsic = Intrinsic_or_Extrinsic[0]
 Spherical_Modes = Spherical_Modes[0]
 
-n_points = 2
+n_points = 10
 
 #---------------------------------------------------------------    
 # FREQUENCY PARAMETERS OF THE SIMULATION. They are the same for every simulated GW

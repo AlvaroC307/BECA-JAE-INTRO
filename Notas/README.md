@@ -1,1 +1,0 @@
-# BECA-JAE-INTRO
