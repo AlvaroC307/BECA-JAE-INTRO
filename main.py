@@ -7,6 +7,7 @@ import csv
 import matplotlib.pyplot as plt 
 from termcolor import colored
 
+import indistinguishability as ind
 from Initial_Values import Intrinsic_or_Extrinsic
 from Initial_Values import delta_T, Approximant_opt, Info_target
 from Simulations import simulationTD, h_target
@@ -14,6 +15,7 @@ from classes import params, chirp_mass_function
 from pycbc.waveform.utils import coalign_waveforms
 import global_variables as gl_var
 import optimization_functions as func
+
 
 #--------------------------------------------OPTIMIZATION FUNCTIONS FOR THE ONLY INTRINSIC PARAMETERS---------------------
 def opt_first_intrinsic(prms_initial:list)->tuple:
@@ -392,7 +394,7 @@ def main(): # Main Function. It executes main_optimization_full or main_optimiza
         for i in range(len(Approximant_opt)): # Obtaining the result for different approximations in the optimizations
             for j in range(len(Info_target)): # Obtaining the result for different target parameters
                 results = main_optimization_full()
-                Fitting_Factor.append(1-results[0])
+                Fitting_Factor.append(results[0])
                 Comp_time.append(results[1])
                 prms_final.append(results[2]) 
 
@@ -406,7 +408,7 @@ def main(): # Main Function. It executes main_optimization_full or main_optimiza
         for i in range(len(Approximant_opt)): # Obtaining the result for different approximations in the optimizations
             for j in range(len(Info_target)): # Obtaining the result for different target parameters
                 results = main_optimization_intrinsic()
-                Fitting_Factor.append(1-results[0])
+                Fitting_Factor.append(results[0])
                 Comp_time.append(results[1])
                 prms_final.append(results[2])
 
@@ -415,28 +417,27 @@ def main(): # Main Function. It executes main_optimization_full or main_optimiza
 
             gl_var.n_aprox_opt +=1
             gl_var.n_target = 0
+    gl_var.n_aprox_opt-=1
 
     return Fitting_Factor, Comp_time, prms_final
 
 
 
-if __name__ == '__main__': 
-
-    Fitting_Factor, Comp_time, prms_final = main()            
+def Save_Data(Fitting_Factor, Comp_time, prms_final):
 
     if Intrinsic_or_Extrinsic == "Extrinsic":
 
         file_test = open('./Data/Testing_Full.csv', "a", newline="")
         csv_test = csv.writer(file_test)
 
-        csv_test.writerow(["FF","T_comp","Q","M_c", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", "incl", "longascnodes", "pol", 
+        csv_test.writerow(["1-FF","T_comp","Q","M_c", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", "incl", "longascnodes", "pol", 
                        "Q_0","M_c_0", "Chi_eff_0", "Chi_2z_0", "Chi_p_0", "theta_p_0", "incl_0", "longascnodes_0", "pol_0"])
 
         j = 0
         for Approximant_optimization in Approximant_opt:
             for Info in Info_target: # Obtaining the result for different target parameters
 
-                csv_test.writerow([Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1], prms_final[j][2],
+                csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1], prms_final[j][2],
                                 prms_final[j][3], prms_final[j][4], prms_final[j][5], prms_final[j][6], prms_final[j][7], prms_final[j][8], Info[1].Q(),
                                 Info[1].chirp_mass(), Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
                                 Info[1].inclination, Info[1].longAscNodes, Info[2]])
@@ -444,7 +445,7 @@ if __name__ == '__main__':
 
     elif Intrinsic_or_Extrinsic == "Intrinsic":
 
-        file_test = open('./Data/Testing_Intrinsic.csv', "w", newline="")
+        file_test = open('./Data/Testing_Intrinsic.csv', "a", newline="")
         csv_test = csv.writer(file_test)
 
         csv_test.writerow(["FF","T_comp","Q","M_c", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", 
@@ -455,10 +456,39 @@ if __name__ == '__main__':
         for Approximant_optimization in Approximant_opt:
             for Info in Info_target: # Obtaining the result for different target parameters
 
-                csv_test.writerow([Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1], prms_final[j][2],
+                csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1], prms_final[j][2],
                                     prms_final[j][3], prms_final[j][4], prms_final[j][5], Info[1].Q(), Info[1].chirp_mass(),
                                     Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),])
                 j+=1
+
+if __name__ == '__main__': 
+
+    Fitting_Factor, Comp_time, prms_final = main()    
+
+    Save_Data(Fitting_Factor, Comp_time, prms_final)    
+
+    overlap = ind.overlap()
+    min_SNR = ind.minimun_SNR(Fitting_Factor, overlap)
+
+    file_SNR = open('./Data/Min_SNR.csv', "a", newline="")
+    csv_SNR = csv.writer(file_SNR)
+
+    csv_SNR.writerow(["1-FF","1-Overlap","SNR", "Q_0","M_c_0", "Chi_eff_0", "Chi_2z_0",
+                       "Chi_p_0", "theta_p_0", "incl_0", "longascnodes_0", "pol_0"])
+    i=0
+    for Info in Info_target:
+        csv_SNR.writerow([1-Fitting_Factor[i], 1-overlap[i], min_SNR[i], Info[1].Q(), Info[1].chirp_mass(), Info[1].eff_spin(),
+                            Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
+                            Info[1].inclination, Info[1].longAscNodes, Info[2]])
+        i+=1
+
+
+
+
+
+
+
+    
 
 
 

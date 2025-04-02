@@ -52,7 +52,7 @@ Approximant_opt = ["IMRPhenomTPHM"] # Chosen Approximant (IMRPhenomTPHM, SEOBNRv
 for i in range(len(Approximant_opt)):
     Approximant_opt[i] = lalsim.GetApproximantFromString(Approximant_opt[i]) 
 
-Approximant_target = ["IMRPhenomTPHM"]#, "IMRPhenomXPHM", "IMRPhenomXO4a"] # Chosen Approximant (IMRPhenomTPHM, SEOBNRv4P, SpinTaylorT4)
+Approximant_target = ["IMRPhenomXO4a"]#, "IMRPhenomXPHM", "IMRPhenomXO4a"] # Chosen Approximant (IMRPhenomTPHM, SEOBNRv4P, SpinTaylorT4)
 for i in range(len(Approximant_target)):
     Approximant_target[i] = lalsim.GetApproximantFromString(Approximant_target[i]) 
 
