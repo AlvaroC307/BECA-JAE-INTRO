@@ -32,11 +32,13 @@ def minimun_SNR(FF, overlap):
         sys.exit()
 
     SNR = []
+    old_SNR = []
 
     for i in range(len(FF)):
         
         if FF[i]<overlap[i]:
             SNR.append("FF<Overlap")
+            old_SNR.append(math.sqrt(n_param/(2*(1-overlap[i]))))
 
         else:
 
@@ -50,5 +52,7 @@ def minimun_SNR(FF, overlap):
             SNR_sq = Coef/(FF[i]-overlap[i])
             SNR.append(math.sqrt(SNR_sq))
 
-    return SNR
+            old_SNR.append(math.sqrt(n_param/(2*(1-overlap[i]))))
+
+    return SNR, old_SNR
 

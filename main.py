@@ -430,16 +430,16 @@ def Save_Data(Fitting_Factor, Comp_time, prms_final):
         file_test = open('./Data/Testing_Full.csv', "a", newline="")
         csv_test = csv.writer(file_test)
 
-        csv_test.writerow(["1-FF","T_comp","Q","M_c", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", "incl", "longascnodes", "pol", 
-                       "Q_0","M_c_0", "Chi_eff_0", "Chi_2z_0", "Chi_p_0", "theta_p_0", "incl_0", "longascnodes_0", "pol_0"])
+        csv_test.writerow(["1-FF","T_comp","Q","M_c (solar masses)", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", "incl", "longascnodes", "pol", 
+                       "Q_0","M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0", "Chi_p_0", "theta_p_0", "incl_0", "longascnodes_0", "pol_0"])
 
         j = 0
         for Approximant_optimization in Approximant_opt:
             for Info in Info_target: # Obtaining the result for different target parameters
 
-                csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1], prms_final[j][2],
+                csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1]/lal.MSUN_SI, prms_final[j][2],
                                 prms_final[j][3], prms_final[j][4], prms_final[j][5], prms_final[j][6], prms_final[j][7], prms_final[j][8], Info[1].Q(),
-                                Info[1].chirp_mass(), Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
+                                Info[1].chirp_mass()/lal.MSUN_SI, Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
                                 Info[1].inclination, Info[1].longAscNodes, Info[2]])
                 j+=1
 
@@ -448,16 +448,16 @@ def Save_Data(Fitting_Factor, Comp_time, prms_final):
         file_test = open('./Data/Testing_Intrinsic.csv', "a", newline="")
         csv_test = csv.writer(file_test)
 
-        csv_test.writerow(["FF","T_comp","Q","M_c", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", 
-                       "Q_0","M_c_0", "Chi_eff_0", "Chi_2z_0", "Chi_p_0", "theta_p_0"])
+        csv_test.writerow(["FF","T_comp","Q","M_c (solar masses)", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", 
+                       "Q_0","M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0", "Chi_p_0", "theta_p_0"])
 
 
         j = 0
         for Approximant_optimization in Approximant_opt:
             for Info in Info_target: # Obtaining the result for different target parameters
 
-                csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1], prms_final[j][2],
-                                    prms_final[j][3], prms_final[j][4], prms_final[j][5], Info[1].Q(), Info[1].chirp_mass(),
+                csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1]/lal.MSUN_SI, prms_final[j][2],
+                                    prms_final[j][3], prms_final[j][4], prms_final[j][5], Info[1].Q(), Info[1].chirp_mass()/lal.MSUN_SI,
                                     Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),])
                 j+=1
 
@@ -468,31 +468,18 @@ if __name__ == '__main__':
     Save_Data(Fitting_Factor, Comp_time, prms_final)    
 
     overlap = ind.overlap()
-    min_SNR = ind.minimun_SNR(Fitting_Factor, overlap)
+    min_SNR, min_old_SNR = ind.minimun_SNR(Fitting_Factor, overlap)
 
     file_SNR = open('./Data/Min_SNR.csv', "a", newline="")
     csv_SNR = csv.writer(file_SNR)
 
-    csv_SNR.writerow(["1-FF","1-Overlap","SNR", "Q_0","M_c_0", "Chi_eff_0", "Chi_2z_0",
+    csv_SNR.writerow(["1-FF","1-Overlap","SNR", "old_SNR", "Q_0","M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0",
                        "Chi_p_0", "theta_p_0", "incl_0", "longascnodes_0", "pol_0"])
     i=0
     for Info in Info_target:
-        csv_SNR.writerow([1-Fitting_Factor[i], 1-overlap[i], min_SNR[i], Info[1].Q(), Info[1].chirp_mass(), Info[1].eff_spin(),
-                            Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
-                            Info[1].inclination, Info[1].longAscNodes, Info[2]])
+        csv_SNR.writerow([1-Fitting_Factor[i], 1-overlap[i], min_SNR[i], min_old_SNR[i] ,Info[1].Q(), Info[1].chirp_mass()/lal.MSUN_SI,
+                        Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
+                        Info[1].inclination, Info[1].longAscNodes, Info[2]])
         i+=1
 
 
-
-
-
-
-
-    
-
-
-
-
-
-
-    

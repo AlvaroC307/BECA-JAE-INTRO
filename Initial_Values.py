@@ -32,11 +32,11 @@ Spherical_Modes = "All", "Two"
 #---------------------------------------------------------------
 # CHOICES
 
-Target_Form = Target_Form[2]
+Target_Form = Target_Form[1]
 Intrinsic_or_Extrinsic = Intrinsic_or_Extrinsic[0]
 Spherical_Modes = Spherical_Modes[0]
 
-n_points = 10
+n_points = 1
 
 #---------------------------------------------------------------    
 # FREQUENCY PARAMETERS OF THE SIMULATION. They are the same for every simulated GW
@@ -59,28 +59,78 @@ for i in range(len(Approximant_target)):
 #---------------------------------------------------------------
 # TARGET GRAVITATIONAL WAVE
 
-list_Target = Read_Target()
-
-r_target = float(list_Target[8]) * lal.PC_SI # Distance to the binary system
-
-PhiRef_target = eval(list_Target[10])
+r_target = 1e6 * lal.PC_SI # Distance to the binary system
+PhiRef_target = 0
 
 if Target_Form == "Param_Space_Point":
 
-    mass1_target = float(list_Target[0]) * lal.MSUN_SI 
-    mass2_target = float(list_Target[1]) * lal.MSUN_SI
-    masses_target = (mass1_target, mass2_target) # Masses of the Black Holes
+    def M_c_and_q_m(mass_ratio, chirp_mass)->tuple:
+        # Function to Calculate the original masses of the black holes given the mass ratio q_m=m1/m2 and the chirp mass
 
-    spin1_target = (float(list_Target[2]), float(list_Target[3]), float(list_Target[4])) # Spin of the first Black Hole
-    spin2_target = (float(list_Target[5]), float(list_Target[6]), float(list_Target[7])) # Spin of the second Nlack Hole
+        mass2 = chirp_mass*((1+mass_ratio)/mass_ratio**3)**(1/5)
+        mass1 = mass_ratio*mass2
+    
+        return (mass1, mass2)
 
-    incl_target = eval(list_Target[9])  
-    LongAscNodes_target = eval(list_Target[11])
+    def Eff_spin_and_spin1(mass1, mass2, eff_spin, spin2):
+        """ Function to Calculate the third component of the spins of the second black holes 
+        given the spin of the first one and the effective spin parameter """
 
-    parameters_target:params = params(masses_target, spin1_target, spin2_target, r = r_target,
-                                    incl = incl_target, phiRef = PhiRef_target, longAscNodes = LongAscNodes_target) # Write this parameters as a params class
+        spin1 = (eff_spin*(mass1+mass2)-spin2*mass2)/mass1
 
-    pol_target = eval(list_Target[12]) # Polarization of the GW
+        return spin1, spin2
+
+    Q_target = [1.5]
+    chirp_mass_target = [25*lal.MSUN_SI]# IN SOLAR MASSES
+
+    #mass1_target = [50,75,100]  # IN SOLAR MASSES
+    #mass2_target = [50,75,100]  # IN SOLAR MASSES
+    s1x_target = [0.7]
+    s1y_target = [0.7]
+    s1z_target = [0.0]
+    s2z_target = [0.7]
+    incl_target = [pi/2] 
+    LongAscNodes_target = [0]
+    pol_target = np.linspace(0, pi, 10) # Polarization of the GW
+
+
+    masses_target = []
+    spin1_target = []
+    spin2_target = []
+    parameters_target = []
+
+    for chirp_mass in chirp_mass_target:
+        for Q in Q_target:
+            masses_target.append(M_c_and_q_m(Q, chirp_mass))
+                        
+
+    """ for mass1 in mass1_target:
+        for mass2 in mass2_target:
+            masses_target.append((mass1*lal.MSUN_SI, mass2*lal.MSUN_SI)) # Masses of the Black Holes """
+
+    for s1x in s1x_target:
+        for s1y in s1y_target:
+            for s1z in s1z_target:
+                spin1_target.append((s1x, s1y, s1z)) # Spin of the first Black Hole
+                                
+    for s2z in s2z_target:
+        spin2_target.append((0.0, 0.0, s2z)) # Spin of the second Nlack Hole
+    
+    for masses in masses_target:
+        for spin1 in spin1_target:
+            for spin2 in spin2_target:
+                for incl in incl_target:
+                    for longascnodes in LongAscNodes_target:
+                        parameters_target.append(params(masses, spin1, spin2, r = r_target,
+                                    incl = incl, phiRef = PhiRef_target, longAscNodes = longascnodes)) # Write this parameters as a params class
+
+    Info_target = []
+    for prms in parameters_target:
+        for pol in pol_target:
+            for App in Approximant_target:
+                Info_target.append([App, prms, pol])
+    print(len(parameters_target))
+
 
 elif Target_Form == "Random_Space_Point":
 
@@ -112,6 +162,12 @@ elif Target_Form == "Random_Space_Point":
                                         incl = incl_target, phiRef = PhiRef_target, longAscNodes = LongAscNodes_target)) # Write this parameters as a params class
         pol_target.append(rnd.uniform(0, pi/2)) # Polarization of the GW
 
+    Info_target = []
+    for i in range(n_points):
+        for App in Approximant_target:
+            Info_target.append([App, parameters_target[i], pol_target[i]])
+
+
 elif Target_Form == "NR_file":
 
     NRfile = "q1a02t30_T_96_384.h5", "q2a02t30dP0dRm75_T_96_384.h5" # Filename with a NR waveform 
@@ -141,20 +197,18 @@ elif Target_Form == "NR_file":
 
     NR_GW.close()
 
-    incl_target = eval(list_Target[9])  
-    LongAscNodes_target = eval(list_Target[11])
+    #-----------------------------
+    incl_target = 0  
+    LongAscNodes_target = 0
+    pol_target = 0
+    #-------------------------
 
     parameters_target:params = params(masses_target, spin1_target, spin2_target, r = r_target,
                                    incl = incl_target, phiRef = PhiRef_target, longAscNodes = LongAscNodes_target) # Write this parameters as a params class
 
-    pol_target = eval(list_Target[12]) # Polarization of the GW
-
-
-Info_target = []
-for Approximant in Approximant_target:
-    Info_target.append([Approximant, parameters_target, pol_target])
-
-if Target_Form == "Random_Space_Point":
     Info_target = []
-    for i in range(n_points):
-        Info_target.append([Approximant_target[0], parameters_target[i], pol_target[i]])
+    for Approximant in Approximant_target:
+        Info_target.append([Approximant, parameters_target, pol_target])
+
+
+
