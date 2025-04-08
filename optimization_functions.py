@@ -1,41 +1,13 @@
 import math
 import nlopt
 import lal
-from termcolor import colored
 
-from Initial_Values import simulationTD, Approximant_opt
 import global_variables as gl_var
 from classes import params
 from pycbc.types import TimeSeries
 from match import perform_match
+from Initial_Values import M_c_and_q_m, Eff_spin_and_spin1, spin1p_mod_and_angle, simulationTD, Approximant_opt
 from Initial_Values import delta_T, f_min, f_max, Info_target, h_target
-
-
-def M_c_and_q_m(mass_ratio, chirp_mass)->tuple:
-    # Function to Calculate the original masses of the black holes given the mass ratio q_m=m1/m2 and the chirp mass
-
-    mass2 = chirp_mass*((1+mass_ratio)/mass_ratio**3)**(1/5)
-    mass1 = mass_ratio*mass2
-    
-    return (mass1, mass2)
-
-
-def Eff_spin_and_spin1(mass1, mass2, eff_spin, spin2):
-    """ Function to Calculate the third component of the spins of the second black holes 
-    given the spin of the first one and the effective spin parameter """
-
-    spin1 = (eff_spin*(mass1+mass2)-spin2*mass2)/mass1
-
-    return spin1, spin2
-
-
-def spin1p_mod_and_angle(spin1perp, angle_spin1):
-    """ Function to Calculate the xy components of the large body spin given the perpendicular component and the angle"""
-
-    spin1x = spin1perp*math.cos(angle_spin1)
-    spin1y = spin1perp*math.sin(angle_spin1)
-
-    return spin1x, spin1y
 
 
 def opt_match_full(prms:list, grad)->float: # ----------------------TOTAL OPTIMIZATION------------------------------ 
@@ -155,8 +127,8 @@ def opt_first_intrinsic(prms_initial:list)->tuple:
     prms_final = opt.optimize(prms_initial) # Start The Optimization
     max_match = -opt.last_optimum_value() # Obtain the best value of the match
 
-    print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
-             f"Q = {prms_initial[0]}, M_chirp = {int(prms_initial[1]/lal.MSUN_SI)} solar masses, Chi_eff = {prms_initial[2]}.", "cyan"))
+    # print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
+    #         f"Q = {prms_initial[0]}, M_chirp = {int(prms_initial[1]/lal.MSUN_SI)} solar masses, Chi_eff = {prms_initial[2]}.", "cyan"))
 
     return max_match, prms_final
 
@@ -184,11 +156,13 @@ def opt_second_intrinsic(prms_initial:list, detail:bool = True)->tuple:
     prms_final = opt.optimize(prms_initial) # Start The Optimization
     max_match = -opt.last_optimum_value()
 
+    """
     if detail:
         print(colored(f"Number of Evaluations: {opt.get_numevals()}.", "cyan"))
     else:
         print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
              f"Chi_2z = {prms_initial[3]}, Chi_p = {prms_initial[4]}, Theta_precession = {str(round(prms_initial[5]/math.pi,2))}*pi.", "cyan"))
+    """
 
     return max_match, prms_final
 #--------------------------------------------OPTIMIZATION FUNCTIONS FOR THE ONLY INTRINSIC PARAMETERS---------------------
@@ -213,8 +187,8 @@ def opt_first(prms_initial:list)->tuple:
     prms_final = opt.optimize(prms_initial) # Start The Optimization
     max_match = -opt.last_optimum_value() # Obtain the best value of the match
 
-    print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
-                 f"Q = {prms_initial[0]}, M_chirp = {int(prms_initial[1]/lal.MSUN_SI)} solar masses, Chi_eff = {prms_initial[2]}.", "cyan"))
+    #print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
+    #             f"Q = {prms_initial[0]}, M_chirp = {int(prms_initial[1]/lal.MSUN_SI)} solar masses, Chi_eff = {prms_initial[2]}.", "cyan"))
 
     return max_match, prms_final
 
@@ -237,8 +211,8 @@ def opt_second_full(prms_initial:list)->tuple:
     prms_final = opt.optimize(prms_initial) # Start The Optimization
     max_match = -opt.last_optimum_value()
 
-    print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
-             f"Chi_2z = {prms_initial[3]}, Chi_p = {prms_initial[4]}, incl = {str(round(prms_initial[5]/math.pi,2))}*pi.", "cyan"))
+    #print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
+    #         f"Chi_2z = {prms_initial[3]}, Chi_p = {prms_initial[4]}, incl = {str(round(prms_initial[5]/math.pi,2))}*pi.", "cyan"))
 
     return max_match, prms_final
 
@@ -267,13 +241,15 @@ def opt_third_full(prms_initial:list, detail:bool = True)->tuple:
     prms_final = opt.optimize(prms_initial) # We use the parameters obtained by the global optimization as the starting point
     max_match = -opt.last_optimum_value()
 
+    """
     if detail:
         print(colored(f"Number of Evaluations: {opt.get_numevals()}.", "cyan"))
     else:
         print(colored(f"Number of Evaluations: {opt.get_numevals()} made by initial conditions: "
                 f"Theta_precession = {str(round(prms_initial[5]/math.pi,2))}*pi, longAscNodes = {str(round(prms_initial[7]/math.pi,2))}*pi, "
                 f"polarization = {str(round(prms_initial[8]/math.pi,2))}*pi.", "cyan"))
-    
+    """
+
     return max_match, prms_final
 
 #--------------------------------------------OPTIMIZATION FUNCTIONS FOR THE COMPLETE LIST OF PARAMETERS---------------------

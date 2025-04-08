@@ -1,19 +1,15 @@
 import lal
 import math
 import time
-from pycbc.types import TimeSeries
 import csv
-import matplotlib.pyplot as plt 
 from termcolor import colored
 from joblib import Parallel, delayed
 
 
 import indistinguishability as ind
 from Initial_Values import Intrinsic_or_Extrinsic
-from Initial_Values import delta_T, Approximant_opt, Info_target, n_workers, list_Info_target, h_target
-from Initial_Values import simulationTD
-from classes import params, chirp_mass_function
-from pycbc.waveform.utils import coalign_waveforms
+from Initial_Values import Approximant_opt, Info_target, n_workers, list_Info_target
+from classes import chirp_mass_function
 import global_variables as gl_var
 import optimization_functions as func
 
@@ -58,7 +54,7 @@ def main_optimization_intrinsic():
             prms_final = results_multiprocess[1]
 
 
-    print(f"The match of the first optimization is: {max_match}. It took {time.time()-time_initial} seconds.")
+    print(f"The match of the first optimization is: {max_match}. It took {time.time()-time_initial} seconds. Cpu: {gl_var.name_worker}")
     print(colored("Second Optimization: Spin2z and Precession Parameters", "green"))
 
     prms_initial = []
@@ -74,40 +70,13 @@ def main_optimization_intrinsic():
             prms_final = results_multiprocess[1]
 
 
-    print(f"The match of the second optimization is: {max_match}. It took {time.time()-time_initial} seconds.")
+    print(f"The match of the second optimization is: {max_match}. It took {time.time()-time_initial} seconds. Cpu: {gl_var.name_worker}")
     print(colored("Third Optimization: Increasing Accuracy", "green"))
 
     max_match, prms_final = func.opt_second_intrinsic(prms_final, detail = True) # Add detail to the optimization.
     Comp_time = time.time()-time_initial
-    print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds.", "magenta"))
+    print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds. Cpu: {gl_var.name_worker}", "magenta"))
 
-
-    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
-
-    # Obtaining the values for representing the Gravitational Wave
-    masses_final = func.M_c_and_q_m(prms_final[0], prms_final[1])
-    spin1z_final, spin2z_final = func.Eff_spin_and_spin1(masses_final[0], masses_final[1], prms_final[2], prms_final[3])
-    spin1x_final, spin1y_final = func.spin1p_mod_and_angle(prms_final[4],prms_final[5])
-
-    # Waveforms Coaligned 
-    optimized_params = params(masses_final, (spin1x_final,spin1y_final,spin1z_final), (0,0,spin2z_final))
-    hp_test, hc_test, time_test = simulationTD(Approximant_opt[gl_var.n_aprox_opt], optimized_params)
-    h_test = hp_test*math.cos(Info_target[gl_var.name_worker][gl_var.n_target][2]) + hc_test*math.sin(Info_target[gl_var.name_worker][gl_var.n_target][2]) 
-
-    h1_aligned, h2_aligned = coalign_waveforms(h_target[gl_var.name_worker][gl_var.n_target], TimeSeries(h_test, delta_t=delta_T))
-
-    # Plot of the coaligned waveforms
-    plt.figure(figsize=(12, 5))
-    plt.plot(h1_aligned.sample_times, h1_aligned, label = f'Target')
-    plt.plot(h2_aligned.sample_times, h2_aligned, label = f'Template.', linestyle='dashed')
-    plt.title(f'The mismatch between the gravitational waves is {1-max_match}')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Strain')
-    plt.legend()
-    plt.savefig('./Graphics/main_intrinsic.png', bbox_inches='tight') 
-    #plt.show() 
-
-    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
 
     return max_match, Comp_time, prms_final
 
@@ -155,7 +124,7 @@ def main_optimization_full():
             prms_final = results_multiprocess[1]
 
 
-    print(f"The match of the first optimization is: {max_match}. It took {time.time()-time_initial} seconds.")
+    print(f"The match of the first optimization is: {max_match}. It took {time.time()-time_initial} seconds. Cpu: {gl_var.name_worker}")
     print(colored("Second Optimization: Spin2z, Chi_p and Inclination", "green"))
 
 
@@ -173,7 +142,7 @@ def main_optimization_full():
             prms_final = results_multiprocess[1]
 
 
-    print(f"The match of the second optimization is: {max_match}. It took {time.time()-time_initial} seconds.")
+    print(f"The match of the second optimization is: {max_match}. It took {time.time()-time_initial} seconds. Cpu: {gl_var.name_worker}")
     print(colored("Third Optimization: Theta_precession, LongAscNodes and Polarization", "green"))
 
 
@@ -191,52 +160,22 @@ def main_optimization_full():
             prms_final = results_multiprocess[1]
 
 
-    print(f"The match of the total optimization is: {max_match}. The complete optimization took {time.time()-time_initial} seconds.")
+    print(f"The match of the total optimization is: {max_match}. The complete optimization took {time.time()-time_initial} seconds. Cpu: {gl_var.name_worker}")
     print(colored("Fourth Optimization: Increasing Accuracy", "green"))
 
     max_match, prms_final = func.opt_third_full(prms_final, detail=True) # Add detail to the optimization.
     Comp_time = time.time()-time_initial
-    print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds.", "magenta"))
+    print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds. Cpu: {gl_var.name_worker}", "magenta"))
 
-
-    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
-
-    # Obtaining the parameters to plot the gravitational Waveforms
-    masses_final = func.M_c_and_q_m(prms_final[0], prms_final[1])
-    spin1z_final, spin2z_final = func.Eff_spin_and_spin1(masses_final[0], masses_final[1], prms_final[2], prms_final[3])
-    spin1x_final, spin1y_final = func.spin1p_mod_and_angle(prms_final[4], prms_final[5])
-
-    # Waveforms Coaligned 
-    optimized_params = params(masses_final, (spin1x_final, spin1y_final, spin1z_final), (0,0,spin2z_final),
-                                                       incl=prms_final[6], longAscNodes=prms_final[7])
-    optimized_pol = prms_final[8]
-
-    hp_test, hc_test, time_test = simulationTD(Approximant_opt[gl_var.n_aprox_opt], optimized_params)
-    hp_test, hc_test = TimeSeries(hp_test, delta_t=delta_T), TimeSeries(hc_test, delta_t=delta_T)
-    h_test = hp_test*math.cos(2*optimized_pol)+hc_test*math.sin(2*optimized_pol)
-    h1_aligned, h2_aligned = coalign_waveforms(h_target[gl_var.name_worker][gl_var.n_target], h_test)
-
-    # Plot of the coaligned waveforms
-    plt.figure(figsize=(12, 5))
-    plt.plot(h1_aligned.sample_times, h1_aligned, label = f'Target')
-    plt.plot(h2_aligned.sample_times, h2_aligned, label = f'Template.', linestyle='dashed')
-    plt.title(f'The mismatch between the gravitational waves is {1-max_match}')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Strain')
-    plt.legend()
-    plt.savefig('./Graphics/main_full.png', bbox_inches='tight') 
-    #plt.show() 
-
-    #---------------------PLOTTING THE TARGET GW AGAINST THE OBTAINED GRAVITATIONAL WAVE--------------------
 
     return max_match, Comp_time, prms_final
 
 
 def main(name_worker:int): # Main Function. It executes main_optimization_full or main_optimization_intrinsic depending on the input of the user. 
 
-    gl_var.name_worker = name_worker # Giving nuber to the worker of the multiprocessing
+    gl_var.name_worker = name_worker # Giving number to the worker of the multiprocessing
 
-    Fitting_Factor, Comp_time, prms_final = [],[],[]
+    Fitting_Factor, Comp_time, prms_final = [],[],[] # Initializing the lists to save the results of the optimization
 
     if Intrinsic_or_Extrinsic == "Extrinsic": # Uses the optimization of every possible parameter
         for i in range(len(Approximant_opt)): # Obtaining the result for different approximations in the optimizations
@@ -272,19 +211,18 @@ def main(name_worker:int): # Main Function. It executes main_optimization_full o
 
 
 def Save_Data(Fitting_Factor:list, Comp_time:list, prms_final:list):
-
+    """Function to save the data of the optimization in a csv file. The data is saved in a folder called Data."""
     if Intrinsic_or_Extrinsic == "Extrinsic":
 
         file_test = open('./Data/Testing_Full.csv', "a", newline="")
         csv_test = csv.writer(file_test)
 
+        # Write the header of the csv file
         csv_test.writerow(["1-FF","T_comp","Q","M_c (solar masses)", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", "incl", "longascnodes", "pol", 
                        "Q_0","M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0", "Chi_p_0", "theta_p_0", "incl_0", "longascnodes_0", "pol_0"])
 
-        
         for Approximant_optimization in Approximant_opt:
             for j, Info in enumerate(list_Info_target): # Obtaining the result for different target parameters
-
                 csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1]/lal.MSUN_SI, prms_final[j][2],
                                 prms_final[j][3], prms_final[j][4], prms_final[j][5], prms_final[j][6], prms_final[j][7], prms_final[j][8], Info[1].Q(),
                                 Info[1].chirp_mass()/lal.MSUN_SI, Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
@@ -295,14 +233,12 @@ def Save_Data(Fitting_Factor:list, Comp_time:list, prms_final:list):
         file_test = open('./Data/Testing_Intrinsic.csv', "a", newline="")
         csv_test = csv.writer(file_test)
 
+        # Write the header of the csv file
         csv_test.writerow(["FF","T_comp","Q","M_c (solar masses)", "Chi_eff", "Chi_2z", "Chi_p", "theta_p", 
                        "Q_0","M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0", "Chi_p_0", "theta_p_0"])
-
-
         
         for Approximant_optimization in Approximant_opt:
             for j, Info in enumerate(list_Info_target): # Obtaining the result for different target parameters
-
                 csv_test.writerow([1-Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1]/lal.MSUN_SI, prms_final[j][2],
                                     prms_final[j][3], prms_final[j][4], prms_final[j][5], Info[1].Q(), Info[1].chirp_mass()/lal.MSUN_SI,
                                     Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),])
@@ -311,26 +247,27 @@ def Save_Data(Fitting_Factor:list, Comp_time:list, prms_final:list):
 
 if __name__ == '__main__': 
 
-    results_multiprocess = Parallel(n_jobs=n_workers)(delayed(main)(i) for i in range(n_workers))
-
-    # Write the results as a list
+    results_multiprocess = Parallel(n_jobs=n_workers)(delayed(main)(i) for i in range(n_workers)) # Multiprocessing the optimization
+    print(colored("The optimization has been completed.", "red"))
+    
     Fitting_Factor = []
     Comp_time = []
     prms_final = []
-    for list_worker in results_multiprocess:    
+    for list_worker in results_multiprocess: # Write the results of every CPU as a list 
         for i in range(len(list_worker[0])):
             Fitting_Factor.append(list_worker[0][i])
             Comp_time.append(list_worker[1][i])
             prms_final.append(list_worker[2][i])
 
-    Save_Data(Fitting_Factor, Comp_time, prms_final)    
+    Save_Data(Fitting_Factor, Comp_time, prms_final) # Save the data in a csv file   
 
-    overlap = ind.overlap()
-    min_SNR, min_old_SNR = ind.minimun_SNR(Fitting_Factor, overlap)
+    overlap = ind.overlap() # Calculate the overlap between the templates
+    min_SNR, min_old_SNR = ind.minimun_SNR(Fitting_Factor, overlap) 
 
     file_SNR = open('./Data/Min_SNR.csv', "a", newline="")
     csv_SNR = csv.writer(file_SNR)
 
+    # Write the header of the csv file
     csv_SNR.writerow(["1-FF","1-Overlap","SNR", "old_SNR", "Q_0","M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0",
                        "Chi_p_0", "theta_p_0", "incl_0", "longascnodes_0", "pol_0"])
     
@@ -338,5 +275,3 @@ if __name__ == '__main__':
         csv_SNR.writerow([1-Fitting_Factor[i], 1-overlap[i], min_SNR[i], min_old_SNR[i] ,Info[1].Q(), Info[1].chirp_mass()/lal.MSUN_SI,
                         Info[1].eff_spin(), Info[1].s2z, Info[1].spin1p_mod(), Info[1].spin1p_angle(),
                         Info[1].inclination, Info[1].longAscNodes, Info[2]])
-
-

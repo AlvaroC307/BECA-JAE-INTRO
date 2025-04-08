@@ -7,34 +7,56 @@ import lalsimulation as lalsim
 import h5py
 from pycbc.types import TimeSeries
 
+#-----------------------------DONT CHANGE----------------------------------
+def M_c_and_q_m(mass_ratio, chirp_mass)->tuple:
+        # Function to Calculate the original masses of the black holes given the mass ratio q_m=m1/m2 and the chirp mass
 
-#---------------------------------------------------------------
-# LIST OF CHOICES OF PROGRAM OPTION
+        mass2 = chirp_mass*((1+mass_ratio)/mass_ratio**3)**(1/5)
+        mass1 = mass_ratio*mass2
+    
+        return (mass1, mass2)
+
+def Eff_spin_and_spin1(mass1, mass2, eff_spin, spin2):
+        """ Function to Calculate the third component of the spins of the second black holes 
+        given the spin of the first one and the effective spin parameter """
+
+        spin1 = (eff_spin*(mass1+mass2)-spin2*mass2)/mass1
+
+        return spin1, spin2
+
+def spin1p_mod_and_angle(spin1perp, angle_spin1):
+    """ Function to Calculate the xy components of the large body spin given the perpendicular component and the angle"""
+
+    spin1x = spin1perp*cos(angle_spin1)
+    spin1y = spin1perp*sin(angle_spin1)
+
+    return spin1x, spin1y
+#----------------------------------DONT CHANGE----------------------------------
+
+#-----------------------------LIST OF CHOICES OF PROGRAM OPTION----------------------------------
 
 Target_Form = "NR_file", "Param_Space_Point", "Random_Space_Point"
 Intrinsic_or_Extrinsic = "Extrinsic", "Intrinsic" 
 Spherical_Modes = "All", "Two"
 
-#---------------------------------------------------------------
-# CHOICES
-
+#-----------------------------CHOICES----------------------------------
+ 
 Target_Form = Target_Form[1]
 Intrinsic_or_Extrinsic = Intrinsic_or_Extrinsic[0]
 Spherical_Modes = Spherical_Modes[0]
 
-n_points = 5
+n_points = 5 # If Target_Form == "Random_Space_Point" this is the number of points to generate
 n_workers = 5 # Number of cpus to use
 
-#---------------------------------------------------------------    
-# FREQUENCY PARAMETERS OF THE SIMULATION. They are the same for every simulated GW
+#-------------------------FREQUENCY PARAMETERS OF THE SIMULATION. They are the same for every simulated GW--------------------------------------    
 
 delta_T = 1.0/4096.0 
 f_min = 15
 f_max = 250
 f_ref = f_min
 
-#---------------------------------------------------------------    
-# APROXIMANTS USED IN THE OPTIMIZATION
+#--------------------------APROXIMANTS USED IN THE OPTIMIZATION-------------------------------------    
+
 Approximant_opt = ["IMRPhenomTPHM"] # Chosen Approximant (IMRPhenomTPHM, SEOBNRv4P, SpinTaylorT4)
 for i in range(len(Approximant_opt)):
     Approximant_opt[i] = lalsim.GetApproximantFromString(Approximant_opt[i]) 
@@ -43,29 +65,12 @@ Approximant_target = ["IMRPhenomXO4a"]#, "IMRPhenomXPHM", "IMRPhenomXO4a"] # Cho
 for i in range(len(Approximant_target)):
     Approximant_target[i] = lalsim.GetApproximantFromString(Approximant_target[i]) 
 
-#---------------------------------------------------------------
-# TARGET GRAVITATIONAL WAVE
+#-------------------------DATA OF THE TARGET GRAVITATIONAL WAVES--------------------------------------
 
 r_target = 1e6 * lal.PC_SI # Distance to the binary system
-PhiRef_target = 0
+PhiRef_target = 0 # Reference phase of the binary system
 
 if Target_Form == "Param_Space_Point":
-
-    def M_c_and_q_m(mass_ratio, chirp_mass)->tuple:
-        # Function to Calculate the original masses of the black holes given the mass ratio q_m=m1/m2 and the chirp mass
-
-        mass2 = chirp_mass*((1+mass_ratio)/mass_ratio**3)**(1/5)
-        mass1 = mass_ratio*mass2
-    
-        return (mass1, mass2)
-
-    def Eff_spin_and_spin1(mass1, mass2, eff_spin, spin2):
-        """ Function to Calculate the third component of the spins of the second black holes 
-        given the spin of the first one and the effective spin parameter """
-
-        spin1 = (eff_spin*(mass1+mass2)-spin2*mass2)/mass1
-
-        return spin1, spin2
 
     Q_target = [1]
     chirp_mass_target = [40*lal.MSUN_SI]# IN SOLAR MASSES
@@ -198,7 +203,7 @@ elif Target_Form == "NR_file":
         Info_target.append([Approximant, parameters_target, pol_target])
 
 
-#----------------------------------DONT CHANGE ANYTHING----------------------------------
+#----------------------------------DONT CHANGE----------------------------------
 
 def Choose_modes(): # Function to generate waveform_params using the choosen Spherical modes 
 
@@ -271,3 +276,5 @@ list_Info_target = Info_target
 list_h_target = h_target
 Info_target = divide_list(Info_target, n_workers)
 h_target = divide_list(h_target, n_workers)
+
+#----------------------------------DONT CHANGE----------------------------------
