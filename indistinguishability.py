@@ -3,26 +3,26 @@ import math
 from pycbc.types import TimeSeries
 
 from match import perform_match
-from Simulations import h_target, simulationTD
-from Initial_Values import Info_target, delta_T, f_min, f_max, Intrinsic_or_Extrinsic
+import global_variables as gl_var
+from Initial_Values import simulationTD, Approximant_opt
+from Initial_Values import list_Info_target, delta_T, f_min, f_max, Intrinsic_or_Extrinsic, list_h_target
 
 
 def overlap():
 
     overlap = []
-    i = 0
-    for Info in Info_target:
+    for i, Info in enumerate(list_Info_target):
 
-        hp, hc, time = simulationTD(Info[1]) # Simulation of the GW
+
+        hp, hc, time = simulationTD(Approximant_opt[gl_var.n_aprox_opt], Info[1]) # Simulation of the GW
         hp, hc = TimeSeries(hp, delta_t = delta_T), TimeSeries(hc, delta_t = delta_T) # Writing the GW as a pycbc TimeSeries Class
         h = hp*math.cos(2*Info[2])+hc*math.sin(2*Info[2]) # We compute the total strain using the polarization of the wave
 
-        match, _ = perform_match(h_target[i], h, f_lower = f_min, f_high = f_max, optimized = False, return_phase = False)
+        match, _ = perform_match(list_h_target[i], h, f_lower = f_min, f_high = f_max, optimized = False, return_phase = False)
         overlap.append(match)
 
-        i+=1
-
     return overlap
+
 
 def minimun_SNR(FF, overlap):
 

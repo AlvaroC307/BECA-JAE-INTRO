@@ -4,3 +4,4 @@
 
 n_aprox_opt = 0
 n_target = 0
+name_worker = None
