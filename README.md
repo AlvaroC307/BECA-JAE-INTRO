@@ -24,12 +24,12 @@ In addition, I used a package to have colours in the prints and make it easier t
 
 # How to Use the code
 
-To use the code you should only change the file Initial_Values.py (unless you know what you are doing with it). Here, you can read the most useful things to set in the code.
+To use the code you can change the file Initial_Values.py. Here, you can the most useful things to set in the code.
 
-To choose a option of the code you can change the lines 44 to 46. The options are set on lines 38-40, so you can add more options if you want. The line 48 are the number of random points in the parameter space to generate (if you chose Target_Form == "Random_Space_Point") and the line 49 are the number of workers (cpus) that you want to use in multiprocessing.
+To choose a option of the code you can change the lines 43 to 45. The options are set on lines 37-39, so you can add more options if you want. The line 47 are the number of random points in the parameter space to generate per worker (cpu) and the line 48 are the number of workers (cpus) that you want to use in multiprocessing.
 
-The lines 53 to 56 set the frequency constants of the simulation. Then, in the lines 58-67 you can set the name of the aproximant that you want to use, you should only change line 60 or 64.
+The lines 52 to 55 set the frequency constants of the simulation. Then, in the lines 59-65 you can set the name of the aproximant that you want to use, you should only change line 59 or 63.
 
-Finally, you can set r and Phi_ref in the lines 70 and 71 if you want a specific set of those reference values. Moreover, in Target_Form == "Param_Space_Point" you can set a list of the target values that you want to test, the important thing is that in the end there is a param class ((masses), (spins1), (spins2), r, incl, PhiRef, longascnodes) and a Info_target (Approximant, param class, polarization). Target_Form == "NR_file" is yet to be tested and finalized.
+Finally, you can set r and Phi_ref in the lines 69 and 70 if you want a specific set of those reference values. Moreover, in Target_Form == "Param_Space_Point" you can set a list of the target values that you want to test, the important thing is that in the end there is a param class ((masses), (spins1), (spins2), r, incl, PhiRef, longascnodes) and a Info_target (Approximant, param class, polarization). Target_Form == "NR_file" is yet to be tested and finalized.
 
 Once everything regarding the target gravitational waves is set, you can execute the code by writing: python main.py. After that, the data is saved in the folder /Data/. 
