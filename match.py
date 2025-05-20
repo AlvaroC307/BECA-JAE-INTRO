@@ -23,7 +23,7 @@ def perform_match(h1:TimeSeries, h2:TimeSeries, f_lower=f_min, f_high=f_max,
     
     # Match the signal sizes
     length = max(len(h1), len(h2))
-    h1.resize(length); h2.resize(length)
+    h1.resize(length); h2.resize(length) #TODO
 
     # Choose the step to compute the PSD
     delta_f = 1/h1.duration

@@ -147,7 +147,7 @@ def main_optimization_intrinsic():
 
     max_match, prms_final = func.opt_second_intrinsic(prms_final, detail = True) # Add detail to the optimization.
     Comp_time = time.time()-time_initial
-    print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds. Cpu: {gl_var.name_worker}", "magenta"))
+    print(colored(f"The Fitting Factor of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds. Cpu: {gl_var.name_worker}", "magenta"))
 
     return max_match, Comp_time, prms_final
 
@@ -164,19 +164,37 @@ def main_optimization_full():
     #-------------------INITIAL VALUES FOR THE OPTIMIZATION-------------------
 
     # FIRST OPTIMIZATION: Masses and Effective Spin
-    mass1_template = [8*lal.MSUN_SI, 8*lal.MSUN_SI, 100*lal.MSUN_SI, 100*lal.MSUN_SI, 40*lal.MSUN_SI, 40*lal.MSUN_SI]
-    mass2_template = [4*lal.MSUN_SI, 4*lal.MSUN_SI, 10*lal.MSUN_SI, 10*lal.MSUN_SI, 10*lal.MSUN_SI, 10*lal.MSUN_SI]
-    eff_spin_template = [-0.5, 0.5, 0.7, -0.7, 0.7, -0.7]
+    mass1_template = [8*lal.MSUN_SI, 8*lal.MSUN_SI, 100*lal.MSUN_SI, 100*lal.MSUN_SI, 40*lal.MSUN_SI,
+                        40*lal.MSUN_SI, 5*lal.MSUN_SI, 5*lal.MSUN_SI, 20*lal.MSUN_SI, 20*lal.MSUN_SI,
+                        40*lal.MSUN_SI, 40*lal.MSUN_SI, 100*lal.MSUN_SI, 100*lal.MSUN_SI, 80*lal.MSUN_SI,
+                        80*lal.MSUN_SI, 120*lal.MSUN_SI, 120*lal.MSUN_SI, 70*lal.MSUN_SI, 70*lal.MSUN_SI]
+    mass2_template = [4*lal.MSUN_SI, 4*lal.MSUN_SI, 10*lal.MSUN_SI, 10*lal.MSUN_SI, 10*lal.MSUN_SI,
+                        10*lal.MSUN_SI, 5*lal.MSUN_SI, 5*lal.MSUN_SI, 20*lal.MSUN_SI, 20*lal.MSUN_SI,
+                        30*lal.MSUN_SI, 30*lal.MSUN_SI, 70*lal.MSUN_SI, 70*lal.MSUN_SI, 80*lal.MSUN_SI,
+                        80*lal.MSUN_SI, 15*lal.MSUN_SI, 15*lal.MSUN_SI, 50*lal.MSUN_SI, 50*lal.MSUN_SI]
+    eff_spin_template = [0.5, -0.5, 0.7, -0.7, 0.7,
+                        -0.7, 0.3, -0.3, 0.4, -0.4,
+                        0.6, -0.6, 0.3, 0.3, 0.7,
+                        -0.7, 0.4, -0.4, 0.5, -0.5]
 
     # SECOND OPTIMIZATION: Spin2z, Chi_p and Inclination
-    spin2z_template = [0.0, 0.0 ,-0.4, 0.4, -0.7, 0.7]
-    chi_p_template = [0.4, 0.4, 0.4, 0.4, 0.4, 0.4]
-    incl_template = [0, math.pi/2 ,math.pi/2, math.pi/2, 3*math.pi/2, 3*math.pi/2]
+    spin2z_template = [0.0, 0.0 ,-0.4, 0.4, -0.7, 0.7, 0.0, 0.0 ,-0.4, 0.4, -0.7, 0.7,
+                       0.0, 0.0 ,-0.4, 0.4, -0.7, 0.7, 0.2 -0.2]
+    chi_p_template = [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2,
+                      0.6, 0.6, 0.6, 0.6, 0.6, 0.6, 0.7, 0.7]
+    incl_template = [0, math.pi/2 ,math.pi/2, math.pi/2, 3*math.pi/2, 3*math.pi/2, 0, math.pi/2 ,math.pi/2, math.pi/2, 3*math.pi/2, 3*math.pi/2,
+                     0, math.pi/2 ,math.pi/2, math.pi/2, 3*math.pi/2, 3*math.pi/2, math.pi/4, 3*math.pi/4]
 
     # THIRD OPTIMIZATION: Theta_precession, LongAscNodes and Polarization
-    anglespin1_template = [-math.pi/2, -math.pi/2, -math.pi/2, math.pi/2, math.pi/2, math.pi/2]
-    LongAscNodes_template = [0, math.pi/4, 0, math.pi/4, 0, math.pi/4]
-    pol_template = [0, 0, math.pi/4, math.pi/4, math.pi/4, 0] 
+    anglespin1_template = [-math.pi/2, -math.pi/2, -math.pi/2, math.pi/2, math.pi/2, math.pi/2,
+                           -math.pi/3, -math.pi/3, -math.pi/3, math.pi/3, math.pi/3, math.pi/3,
+                           -math.pi/4, -math.pi/4, -math.pi/4, math.pi/4, math.pi/4, math.pi/4, 0., 0.]
+    LongAscNodes_template = [0, math.pi/4, 3*math.pi/2, 0, math.pi/4, 3*math.pi/2,
+                             0, math.pi/4, 3*math.pi/2, 0, math.pi/4, 3*math.pi/2,
+                             0, math.pi/4, 3*math.pi/2, 0, math.pi/4, 3*math.pi/2, math.pi, math.pi]
+    pol_template = [math.pi/4, 0, math.pi/3, math.pi/4, 0, math.pi/3,
+                    math.pi/4, 0, math.pi/3, math.pi/4, 0, math.pi/3,
+                    math.pi/4, 0, math.pi/3, math.pi/4, 0, math.pi/3, math.pi/6, math.pi/2] 
 
     #-------------------INITIAL VALUES FOR THE OPTIMIZATION-------------------
 
@@ -230,7 +248,7 @@ def main_optimization_full():
 
     max_match, prms_final = func.opt_third_full(prms_final, detail=True) # Add detail to the optimization.
     Comp_time = time.time()-time_initial
-    print(colored(f"The match of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds. Cpu: {gl_var.name_worker}", "magenta"))
+    print(colored(f"The Fitting Factor of the total optimization is: {max_match}. The complete optimization took {Comp_time} seconds. Cpu: {gl_var.name_worker}", "magenta"))
 
 
     return max_match, Comp_time, prms_final
@@ -251,12 +269,12 @@ def main(name_worker:int): # Main Function. It executes main_optimization_full o
 
     if Intrinsic_or_Extrinsic == "Extrinsic": # Perform optimization over all possible parameters
         for i in range(len(Approximant_opt)): # Iterate over different approximations
-            for j in range(n_points_per_worker): # Iterate over different targets
+            for Info in Info_target[gl_var.name_worker]: # Iterate over different targets
                 results = main_optimization_full() # Perform full optimization
                 Fitting_Factor.append(results[0])
                 Comp_time.append(results[1])
                 prms_final.append(results[2]) 
-                target.append(Info_target[gl_var.name_worker][gl_var.n_target])
+                target.append(Info[gl_var.n_target])
 
                 gl_var.n_target+=1 # Increment the target counter
                 print(f"The {gl_var.n_target + gl_var.n_aprox_opt*n_points_per_worker} optimization has been completed. CPU: {gl_var.name_worker}.")
@@ -266,12 +284,12 @@ def main(name_worker:int): # Main Function. It executes main_optimization_full o
 
     elif Intrinsic_or_Extrinsic == "Intrinsic": # Perform optimization over intrinsic parameters only
         for i in range(len(Approximant_opt)): # Iterate over different approximations
-            for j in range(n_points_per_worker): # Iterate over different targets
+            for Info in Info_target[gl_var.name_worker]: # Iterate over different targets
                 results = main_optimization_intrinsic() # Perform intrinsic optimization
                 Fitting_Factor.append(results[0])
                 Comp_time.append(results[1])
                 prms_final.append(results[2])
-                target.append(Info_target[gl_var.name_worker][gl_var.n_target])
+                target.append(Info[gl_var.n_target])
 
                 gl_var.n_target+=1 # Increment the target counter
                 print(f"The {gl_var.n_target + gl_var.n_aprox_opt*n_points_per_worker} optimization has been completed. CPU: {gl_var.name_worker}.")

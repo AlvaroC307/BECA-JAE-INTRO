@@ -61,6 +61,12 @@ class params: # Class with all the basic information mandatory to simulate a GW
     def spin1p_angle(self) -> float: # Angle of the perpendicular component of the spin of the first black hole. spin1x + i spin1y 
         return math.atan2(self.s1y, self.s1x) 
 
+    def spin2p_mod(self) -> float: # Module of the perpendicular component of the spin of the second black hole
+        return math.sqrt(self.s2x**2+self.s2y**2)
+
+    def spin2p_angle(self) -> float: # Angle of the perpendicular component of the spin of the second black hole. spin1x + i spin1y 
+        return math.atan2(self.s2y, self.s2x) 
+
 
     def __str__(self) -> str: # String to format how does print(params) work
         return f"mass1: {self.m1} | mass2: {self.m2} | spin1: {self.s1x, self.s1y, self.s1z}| spin2: {self.s2x, self.s2y, self.s2z}, | distance: {self.distance}, |inclination: {self.inclination}, |phiRef: {self.phiRef}, |longAscNodes: {self.longAscNodes}, |eccentricity: {self.eccentricity}| meanPerAno: {self.meanPerAno}"

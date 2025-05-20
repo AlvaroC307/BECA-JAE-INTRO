@@ -180,6 +180,7 @@ def opt_first(prms_initial: list) -> tuple:
     opt.set_upper_bounds([20, 175 * lal.MSUN_SI, 1])
     opt.set_min_objective(opt_match_first_step)
 
+
     # Compute overlap for tolerance adjustment
     Info = Info_target[gl_var.name_worker][gl_var.n_target]
     hp, hc, time = simulationTD(Approximant_opt[gl_var.n_aprox_opt], Info[1])
@@ -192,7 +193,7 @@ def opt_first(prms_initial: list) -> tuple:
     if (1 - overlap) < 0.02:
         opt.set_ftol_abs(-overlap)
     else:
-        opt.set_xtol_rel(1e-3)
+        opt.set_xtol_rel(1e-5)
 
     prms_final = opt.optimize(prms_initial)
     max_match = -opt.last_optimum_value()
@@ -212,7 +213,7 @@ def opt_second_full(prms_initial: list) -> tuple:
     opt.set_lower_bounds([1, lal.MSUN_SI, -1, -1, 0, 0])
     opt.set_upper_bounds([20, 175 * lal.MSUN_SI, 1, 1, 1, 2 * math.pi])
     opt.set_min_objective(opt_match_second_step)
-    opt.set_xtol_rel(1e-3)
+    opt.set_xtol_rel(1e-7)
 
     prms_final = opt.optimize(prms_initial)
     max_match = -opt.last_optimum_value()
@@ -235,7 +236,9 @@ def opt_third_full(prms_initial: list, detail: bool = True) -> tuple:
     opt.set_upper_bounds([20, 175 * lal.MSUN_SI, 1, 1, 1, math.pi, 2 * math.pi, math.pi / 2, math.pi / 2])
     opt.set_min_objective(opt_match_full)
 
-    opt.set_xtol_rel(1e-5 if detail else 1e-4)
+    opt.set_xtol_rel(1e-9 if detail else 1e-8)
+
+    print(prms_initial)
 
     prms_final = opt.optimize(prms_initial)
     max_match = -opt.last_optimum_value()
