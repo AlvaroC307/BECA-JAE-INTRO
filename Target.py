@@ -1,4 +1,4 @@
-from Initial_Values import Info_target, delta_T, f_min, f_ref, Spherical_Modes, n_workers
+from Initial_Values import list_Info_target, delta_T, f_min, f_ref, Spherical_Modes, n_workers
 from classes import params
 import lal
 import lalsimulation as lalsim
@@ -22,7 +22,6 @@ def Choose_modes():
 
         # Create the waveform parameters structure
         waveform_params = lal.CreateDict()
-
         mode_array = lalsim.SimInspiralCreateModeArray()
         for l, m in mode_list:
             lalsim.SimInspiralModeArrayActivateMode(mode_array, l, m)
@@ -66,7 +65,7 @@ def simulationTD(Approximant, parameters: params) -> tuple:
 # Compute the target gravitational wave to use it as a global variable
 h_target = []  # List to store the total strain for each target gravitational wave
 
-for Info in Info_target:
+for Info in list_Info_target:
     """
     Info_target contains information about the target gravitational waves:
     - Info[0]: Approximant for the target wave
@@ -102,7 +101,6 @@ def divide_list(data, n_workers):
 
 
 # Divide Info_target and h_target into parts for parallel processing
-list_Info_target = Info_target  # Backup of the original Info_target
 list_h_target = h_target        # Backup of the original h_target
-Info_target = divide_list(Info_target, n_workers)
+Info_target = divide_list(list_Info_target, n_workers)
 h_target = divide_list(h_target, n_workers)

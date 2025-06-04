@@ -64,6 +64,8 @@ def minimun_SNR(FF, overlap):
         n_param = 6
     elif Intrinsic_or_Extrinsic == "Extrinsic":
         n_param = 9
+    elif Intrinsic_or_Extrinsic == "Non-Precessing":
+        n_param = 4
 
     for i in range(len(FF)):
         # If the Fitting Factor is less than the overlap, don't use the new formula

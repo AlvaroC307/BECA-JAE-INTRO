@@ -23,20 +23,20 @@ def Eff_spin_and_spin1(mass1, mass2, eff_spin, spin2):
 
         return spin1, spin2
 
-def spin1p_mod_and_angle(spin1perp, angle_spin1):
+def spinp_mod_and_angle(spin_perp, angle_spin):
     """ Function to Calculate the xy components of the large body spin given the perpendicular component and the angle"""
 
-    spin1x = spin1perp*cos(angle_spin1)
-    spin1y = spin1perp*sin(angle_spin1)
+    spin_x = spin_perp*cos(angle_spin)
+    spin_y = spin_perp*sin(angle_spin)
 
-    return spin1x, spin1y
+    return spin_x, spin_y
 #----------------------------------DONT CHANGE----------------------------------
 
 #-----------------------------LIST OF CHOICES OF PROGRAM OPTION----------------------------------
 
 Target_Form = "NR_file", "Param_Space_Point", "Random_Space_Point"
-Intrinsic_or_Extrinsic = "Extrinsic", "Intrinsic" 
-Spherical_Modes = "All", [[2, 2], [2, -2]]
+Intrinsic_or_Extrinsic = "Extrinsic", "Intrinsic", "Non-Precessing" 
+Spherical_Modes = "All", [[2, 2]]
 
 #-----------------------------CHOICES----------------------------------
   
@@ -44,7 +44,7 @@ Target_Form = Target_Form[1]
 Intrinsic_or_Extrinsic = Intrinsic_or_Extrinsic[0]
 Spherical_Modes = Spherical_Modes[1]
 
-n_points_per_worker = 3 # Number of points to simulate per worker
+n_points_per_worker = 1 # Number of points to simulate per worker
 n_workers = 1 # Number of cpus to use
 
 #-------------------------FREQUENCY PARAMETERS OF THE SIMULATION. They are the same for every simulated GW--------------------------------------    
@@ -60,7 +60,7 @@ Approximant_opt = ["IMRPhenomTPHM"] # Chosen Approximant (IMRPhenomTPHM, SEOBNRv
 for i in range(len(Approximant_opt)):
     Approximant_opt[i] = lalsim.GetApproximantFromString(Approximant_opt[i]) 
 
-Approximant_target = ["IMRPhenomPv2"] # Chosen Approximant (IMRPhenomTPHM, IMRPhenomPv2, SEOBNRv4P, IMRPhenomXPHM), "NRSur7dq2"
+Approximant_target = ["SEOBNRv4PHM"] # Chosen Approximant (IMRPhenomTPHM, IMRPhenomPv2, SEOBNRv4P, IMRPhenomXPHM), "NRSur7dq2"
 for i in range(len(Approximant_target)):
     Approximant_target[i] = lalsim.GetApproximantFromString(Approximant_target[i]) 
 
@@ -71,26 +71,27 @@ PhiRef_target = 0 # Reference phase of the binary system
 
 if Target_Form == "Param_Space_Point":
 
-    Q_target = [1.22, 3.0, 1.2318057005163452, 1.1, 3]
-    chirp_mass_target = [28.7*lal.MSUN_SI, 24.3*lal.MSUN_SI, 76.56205712704784*lal.MSUN_SI, 25*lal.MSUN_SI, 30*lal.MSUN_SI] # IN SOLAR MASSES
+    Q_target = [3.14]
+    chirp_mass_target = [29.800*lal.MSUN_SI] # IN SOLAR MASSES
 
 
-    eff_spin_third_BBH = 0.26575136636734065
+    eff_spin_BBH = 0.437
 
-    s2z_target = [-0.558, 0.0112, -0.0063438606319283775, 0., 0.4]
+    s2z_target = [0.03]
 
-    masses_target_third_BBH = Eff_spin_and_spin1(Q_target[2], chirp_mass_target[2], eff_spin_third_BBH, s2z_target[2]) # Masses of the Black Holes
-    s1z_target = [0.3053, 0.4966, Eff_spin_and_spin1(masses_target_third_BBH[0], masses_target_third_BBH[1], eff_spin_third_BBH, s2z_target[2])[0], 0., 0.5] # Spin of the first Black Hole
+    masses_target = M_c_and_q_m(Q_target[0], chirp_mass_target[0]) # Masses of the Black Holes
+    s1z_target = [Eff_spin_and_spin1(masses_target[0], masses_target[1], eff_spin_BBH, s2z_target[0])[0]] # Spin of the first Black Hole
 
-    spin1xy_third_BBH = spin1p_mod_and_angle(0.4478833617861279, 0.1825993585981389)
+    #spin1xy_third_BBH = spinp_mod_and_angle(0.4478833617861279, 0.1825993585981389)
 
-    s1x_target = [-0.1407, -0.055, spin1xy_third_BBH[0], 0., 0.] # Spin of the first Black Hole
-    s1y_target = [0.0225, -0.0144, spin1xy_third_BBH[1], 0., 0.] # Spin of the first Black Hole
-    
+    s1x_target = [0.] # Spin of the first Black Hole
+    s1y_target = [0.] # Spin of the first Black Hole
+    s2x_target = [0.] # Spin of the second Black Hole
+    s2y_target = [0.] # Spin of the second Black Hole
 
-    incl_target = [2.7454, 1.0839, 0.6031101674517111, pi/4, 0.] # Inclination of the binary system 
-    LongAscNodes_target = [0.0, 0.0, 1.4861708153112014, 0., 0.] # Longitude of the Ascending Node
-    pol_target = [1.4289, 1.4289, 0.9026114263844652, 0., 0.] # Polarization of the GW
+    incl_target = [0.] # Inclination of the binary system 
+    LongAscNodes_target = [0.] # Longitude of the Ascending Node
+    pol_target = [0.] # Polarization of the GW
 
 
     masses_target = []
@@ -101,14 +102,14 @@ if Target_Form == "Param_Space_Point":
     for i in range(len(Q_target)):
         masses_target.append(M_c_and_q_m(Q_target[i], chirp_mass_target[i]))
         spin1_target.append((s1x_target[i], s1y_target[i], s1z_target[i])) # Spin of the first Black Hole
-        spin2_target.append((0.0, 0.0, s2z_target[i])) # Spin of the second Nlack Hole
+        spin2_target.append((s2x_target[i], s2y_target[i], s2z_target[i])) # Spin of the second Nlack Hole
         parameters_target.append(params(masses_target[i], spin1_target[i], spin2_target[i], r = r_target,
                                         incl = incl_target[i], phiRef = PhiRef_target, longAscNodes = LongAscNodes_target[i]))
         
-    Info_target = []
+    list_Info_target = []
     for i in range(len(Q_target)):
         for App in Approximant_target:
-            Info_target.append([App, parameters_target[i], pol_target[i]])
+            list_Info_target.append([App, parameters_target[i], pol_target[i]])
 
 
 elif Target_Form == "Random_Space_Point":
@@ -129,11 +130,13 @@ elif Target_Form == "Random_Space_Point":
         chi2_z = rnd.uniform(-1, 1)
         chi1_p = rnd.uniform(-sqrt(1-chi1_z**2), sqrt(1-chi1_z**2)) # The range is a function of s1z to make sure that |chi_1|<1
         chi1_p_angle = rnd.uniform(-pi, pi)
+        chi2_p = rnd.uniform(-sqrt(1-chi2_z**2), sqrt(1-chi2_z**2)) # The range is a function of s1z to make sure that |chi_1|<1
+        chi2_p_angle = rnd.uniform(-pi, pi)
 
         spin1_target = (chi1_p*cos(chi1_p_angle), chi1_p*sin(chi1_p_angle), chi1_z) # Spin of the first Black Hole
-        spin2_target = (0, 0, chi2_z) # Spin of the second Nlack Hole
+        spin2_target = (chi2_p*cos(chi1_p_angle), chi2_p*sin(chi1_p_angle), chi2_z) # Spin of the second Nlack Hole
 
-        incl_target = rnd.uniform(0,2*pi)
+        incl_target = rnd.uniform(0, 2*pi)
         LongAscNodes_target = rnd.uniform(0, pi/2)
 
 
@@ -141,10 +144,10 @@ elif Target_Form == "Random_Space_Point":
                                             incl = incl_target, phiRef = PhiRef_target, longAscNodes = LongAscNodes_target)) # Write this parameters as a params class
         pol_target.append(rnd.uniform(0, pi/2)) # Polarization of the GW
 
-    Info_target = []
+    list_Info_target = []
     for i in range(n_points_per_worker*n_workers):
         for App in Approximant_target:
-            Info_target.append([App, parameters_target[i], pol_target[i]])
+            list_Info_target.append([App, parameters_target[i], pol_target[i]])
 
 
 elif Target_Form == "NR_file":
@@ -185,6 +188,6 @@ elif Target_Form == "NR_file":
     parameters_target:params = params(masses_target, spin1_target, spin2_target, r = r_target,
                                    incl = incl_target, phiRef = PhiRef_target, longAscNodes = LongAscNodes_target) # Write this parameters as a params class
 
-    Info_target = []
+    list_Info_target = []
     for Approximant in Approximant_target:
-        Info_target.append([Approximant, parameters_target, pol_target])
+        list_Info_target.append([Approximant, parameters_target, pol_target])
