@@ -68,6 +68,36 @@ class params: # Class with all the basic information mandatory to simulate a GW
         return math.atan2(self.s2y, self.s2x) 
 
 
+
+    def params_for_ChooseTDModes(self) -> dict:
+
+        params_intrinsic = {
+            "m1": self.m1,
+            "m2": self.m2,
+            "S1x": self.s1x,
+            "S1y": self.s1y,
+            "S1z": self.s1z,
+            "S2x": self.s2x,
+            "S2y": self.s2y,
+            "S2z": self.s2z,
+            "r": self.distance,
+            "phiRef": self.phiRef,
+        }
+
+        return params_intrinsic
+
+
+    def params_ext(self) -> dict:
+        """Function to return the extra parameters needed for the simulation of a binary system with eccentricity"""
+        params_extra = {
+            "inclination": self.inclination,
+            "longAscNodes": self.longAscNodes,
+            "eccentricity": self.eccentricity,
+            "meanPerAno": self.meanPerAno
+        }
+        return params_extra
+
+
     def __str__(self) -> str: # String to format how does print(params) work
         return f"mass1: {self.m1} | mass2: {self.m2} | spin1: {self.s1x, self.s1y, self.s1z}| spin2: {self.s2x, self.s2y, self.s2z}, | distance: {self.distance}, |inclination: {self.inclination}, |phiRef: {self.phiRef}, |longAscNodes: {self.longAscNodes}, |eccentricity: {self.eccentricity}| meanPerAno: {self.meanPerAno}"
     

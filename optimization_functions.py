@@ -5,10 +5,10 @@ from pycbc.types import TimeSeries
 
 import global_variables as gl_var
 from classes import params
-from match import perform_match
+from match import match_modes
 from Initial_Values import M_c_and_q_m, Eff_spin_and_spin1, spinp_mod_and_angle
-from Initial_Values import delta_T, f_min, f_max, Approximant_opt
-from Target import simulationTD, h_target, Info_target
+from Initial_Values import Approximant_template, mode_list_template
+from Target import simulationTD_modes, modes_target, Info_target
 
 #---------------------------------------------- Functions for optimization ----------------------------------#
 
@@ -38,15 +38,13 @@ def opt_match_full(prms: list, grad) -> float:
 
     # Create parameter object and simulate gravitational wave
     parameters = params(masses, spin1, spin2, incl=prms[8], longAscNodes=prms[9])
-    hp, hc, time = simulationTD(Approximant_opt[gl_var.n_aprox_opt], parameters)
-    hp, hc = TimeSeries(hp, delta_t=delta_T), TimeSeries(hc, delta_t=delta_T)
+    modes_template = simulationTD_modes(Approximant_template[gl_var.n_aprox_opt], mode_list_template, parameters)
 
-    # Compute total strain using polarization
-    h = hp * math.cos(2 * prms[10]) + hc * math.sin(2 * prms[10])
+    Info = Info_target[gl_var.name_worker][gl_var.n_target]
+    match = match_modes(modes_target[gl_var.name_worker][gl_var.n_target], modes_template,
+                        Info[1].params_ext(), parameters.params_ext(),
+                        Info[2], prms[10])
 
-    # Compute match between target and simulated wave
-    match, _ = perform_match(h_target[gl_var.name_worker][gl_var.n_target], h,
-                             f_lower=f_min, f_high=f_max, optimized=False, return_phase=False)
 
     return -match  # Negative sign because nlopt minimizes
 
@@ -203,11 +201,9 @@ def opt_first_non_precessing(prms_initial: list) -> tuple:
 
     # Compute overlap for tolerance adjustment
     Info = Info_target[gl_var.name_worker][gl_var.n_target]
-    hp, hc, time = simulationTD(Approximant_opt[gl_var.n_aprox_opt], Info[1])
-    hp, hc = TimeSeries(hp, delta_t=delta_T), TimeSeries(hc, delta_t=delta_T)
-    h = hp * math.cos(2 * Info[2]) + hc * math.sin(2 * Info[2])
-    overlap, _ = perform_match(h_target[gl_var.name_worker][gl_var.n_target], h,
-                               f_lower=f_min, f_high=f_max, optimized=False, return_phase=False)
+    modes = simulationTD_modes(Approximant_template[gl_var.n_aprox_opt], mode_list_template, Info[1])
+    overlap = match_modes(modes, modes_target[gl_var.name_worker][gl_var.n_target],
+                          Info[1].params_ext(), Info[1].params_ext(), Info[2], Info[2])
 
     # Adjust tolerance based on overlap
     if (1 - overlap) < 0.05:
@@ -259,13 +255,12 @@ def opt_first_intrinsic(prms_initial: list) -> tuple:
     opt.set_upper_bounds([20, 175 * lal.MSUN_SI, 1])
     opt.set_min_objective(opt_match_first_step_intrinsic)
 
+
     # Compute overlap for tolerance adjustment
     Info = Info_target[gl_var.name_worker][gl_var.n_target]
-    hp, hc, time = simulationTD(Approximant_opt[gl_var.n_aprox_opt], Info[1])
-    hp, hc = TimeSeries(hp, delta_t=delta_T), TimeSeries(hc, delta_t=delta_T)
-    h = hp * math.cos(2 * Info[2]) + hc * math.sin(2 * Info[2])
-    overlap, _ = perform_match(h_target[gl_var.name_worker][gl_var.n_target], h,
-                               f_lower=f_min, f_high=f_max, optimized=False, return_phase=False)
+    modes = simulationTD_modes(Approximant_template[gl_var.n_aprox_opt], mode_list_template, Info[1])
+    overlap = match_modes(modes, modes_target[gl_var.name_worker][gl_var.n_target],
+                          Info[1].params_ext(), Info[1].params_ext(), Info[2], Info[2])
 
     # Adjust tolerance based on overlap
     if (1 - overlap) < 0.05:
@@ -341,11 +336,9 @@ def opt_first(prms_initial: list) -> tuple:
 
     # Compute overlap for tolerance adjustment
     Info = Info_target[gl_var.name_worker][gl_var.n_target]
-    hp, hc, time = simulationTD(Approximant_opt[gl_var.n_aprox_opt], Info[1])
-    hp, hc = TimeSeries(hp, delta_t=delta_T), TimeSeries(hc, delta_t=delta_T)
-    h = hp * math.cos(2 * Info[2]) + hc * math.sin(2 * Info[2])
-    overlap, _ = perform_match(h_target[gl_var.name_worker][gl_var.n_target], h,
-                               f_lower=f_min, f_high=f_max, optimized=False, return_phase=False)
+    modes = simulationTD_modes(Approximant_template[gl_var.n_aprox_opt], mode_list_template, Info[1])
+    overlap = match_modes(modes, modes_target[gl_var.name_worker][gl_var.n_target],
+                          Info[1].params_ext(), Info[1].params_ext(), Info[2], Info[2])
 
     # Adjust tolerance based on overlap
     if (1 - overlap) < 0.05:

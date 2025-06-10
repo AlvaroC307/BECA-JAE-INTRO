@@ -36,31 +36,34 @@ def spinp_mod_and_angle(spin_perp, angle_spin):
 
 Target_Form = "NR_file", "Param_Space_Point", "Random_Space_Point"
 Intrinsic_or_Extrinsic = "Extrinsic", "Intrinsic", "Non-Precessing" 
-Spherical_Modes = "All", [[2, 2]]
 
 #-----------------------------CHOICES----------------------------------
   
-Target_Form = Target_Form[1]
+Target_Form = Target_Form[2]
 Intrinsic_or_Extrinsic = Intrinsic_or_Extrinsic[0]
-Spherical_Modes = Spherical_Modes[1]
+
+mode_list_target = [[2, 2]] # "All"
+mode_list_template = [[2,2], [2, -2]] # "All"
+
+pad = 0
 
 n_points_per_worker = 1 # Number of points to simulate per worker
-n_workers = 1 # Number of cpus to use
+n_workers = 6 # Number of cpus to use
 
 #-------------------------FREQUENCY PARAMETERS OF THE SIMULATION. They are the same for every simulated GW--------------------------------------    
 
 delta_T = 1.0/4096.0 
-f_min = 15
+f_min = 7
 f_max = 250
 f_ref = f_min
 
 #--------------------------APROXIMANTS USED IN THE OPTIMIZATION-------------------------------------    
 
-Approximant_opt = ["IMRPhenomTPHM"] # Chosen Approximant (IMRPhenomTPHM, SEOBNRv4P, SpinTaylorT4)
-for i in range(len(Approximant_opt)):
-    Approximant_opt[i] = lalsim.GetApproximantFromString(Approximant_opt[i]) 
+Approximant_template = ["IMRPhenomTPHM"] # Chosen Approximant (IMRPhenomTPHM, SEOBNRv4P, SpinTaylorT4)
+for i in range(len(Approximant_template)):
+    Approximant_template[i] = lalsim.GetApproximantFromString(Approximant_template[i]) 
 
-Approximant_target = ["SEOBNRv4PHM"] # Chosen Approximant (IMRPhenomTPHM, IMRPhenomPv2, SEOBNRv4P, IMRPhenomXPHM), "NRSur7dq2"
+Approximant_target = ["SEOBNRv4P"] # Chosen Approximant (IMRPhenomTPHM, IMRPhenomPv2, SEOBNRv4P, IMRPhenomXPHM), "NRSur7dq2"
 for i in range(len(Approximant_target)):
     Approximant_target[i] = lalsim.GetApproximantFromString(Approximant_target[i]) 
 

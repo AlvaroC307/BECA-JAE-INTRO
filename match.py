@@ -1,9 +1,9 @@
-from pycbc.filter import match as simple_match, optimized_match
+from pycbc.filter import optimized_match
 from pycbc.psd import aLIGOZeroDetHighPower
 from pycbc.types import TimeSeries
 from scipy.interpolate import interp1d 
-from Initial_Values import f_min, f_max
-
+from Initial_Values import f_min, f_max, delta_T
+import lal
 
 import numpy as np
 
@@ -13,39 +13,6 @@ def complex_interp(t, t_arr, arr):
     re = interp1d(t_arr, arr.real, kind="cubic", fill_value=0.0, bounds_error=False)
     im = interp1d(t_arr, arr.imag, kind="cubic", fill_value=0.0, bounds_error=False)
     return re(t) + 1j * im(t)
-
-
-def planck_window(N, eps, left=True, right=False, xp=np):
-    P = np.ceil(eps * N).astype(int)
-    n = xp.arange(1, P)
-    w_decay = xp.zeros(P)
-    w_decay[1:] = 1 / (1 + xp.exp(P/n - P/(P-n)))
-    w = xp.ones(N)
-    if right: w[-P:] = xp.flip(w_decay)
-    if left : w[:P]  = w_decay
-    return w
-
-
-def taper_and_pad_mode(time, h_lm, pad, eps_left=1e-3, taper_right=False):
-    """
-    Taper the left edge with a Planck window, zero-pad both ends **and**
-    return a boolean mask that marks the untouched portion of the signal.
-    """
-    dt   = time[1] - time[0]
-
-    # 1. window ────────────────────────────────────────────────────
-    win   = planck_window(len(h_lm), eps_left, left=True, right=taper_right)
-    h_tp  = h_lm * win
-
-    # 2. zero-pad ─────────────────────────────────────────────────
-    h_pad = np.pad(h_tp, (pad, pad))
-    t_pad = time[0] - pad*dt + np.arange(len(h_pad)) * dt
-
-    # 3. physical-sample mask  (True where window == 1)
-    mask_phys = np.zeros_like(h_pad, dtype=bool)
-    mask_phys[pad + np.flatnonzero(win == 1)] = True
-
-    return t_pad, h_pad, mask_phys
 
 
 def align_modes(
@@ -155,17 +122,7 @@ def align_modes(
     return aligned
 
 
-
-
-
-
-
-
-
-
-
-def perform_match(h1:TimeSeries, h2:TimeSeries, f_lower=f_min, f_high=f_max,
-                   optimized = False, return_phase = False)->tuple:
+def perform_match(h1:TimeSeries, h2:TimeSeries, f_lower=f_min, f_high=f_max, return_phase = False)->tuple:
     """Function to cumpute the match of two given gravitational waves
 
     Args:
@@ -173,16 +130,16 @@ def perform_match(h1:TimeSeries, h2:TimeSeries, f_lower=f_min, f_high=f_max,
         h2 (TimeSeries|FrequencySeries): Second Gravitational Wave
         f_lower (float, optional): Low frequency cutoff. Defaults to f_min
         f_high (float, optional): High frequency cutoff. Defaults to f_max
-        optimized (bool, optional): This parameter tells us to use simple_match or optimized_match. Defaults to False.
         return_phase (bool, optional): This parameter tells us to return the phase or not. Defaults to False.
 
     Returns:
         tuple: The match between the GWs
     """
+
     h1, h2 = h1.real(), h2.real() # The Time Domain only needs the real part of the GWs
     
     # Match the signal sizes
-    length = max(len(h1), len(h2))
+    length = max(len(h1), len(h2)) #TODO igual esto se puede quitar porque ya se hace en align_modes, comprobarlo
     h1.resize(length); h2.resize(length) 
 
     # Choose the step to compute the PSD
@@ -191,23 +148,44 @@ def perform_match(h1:TimeSeries, h2:TimeSeries, f_lower=f_min, f_high=f_max,
     
     psd = aLIGOZeroDetHighPower(length, delta_f, f_lower) # Compute PSD using the base LIGO noise at Zero Detuning and High Power
 
-    """ #--------------
-
-    psi, phi, tau = align_with_pycbc(modes_P, modes_S, t0 = t_pk - 6, t1 = t_pk - 3,
-                                psd = aLIGOZeroDetHighPower(length, delta_f, f_lower),
-                                freq_psd = freq_psd)
-    print("tau, phi and psi:", tau, phi, psi)    
-            
-    modes_S_shift = {}
-    for (ell, mm), v in modes_S.items():
-        rot = np.exp(-1j * (psi+ mm *phi))                       # phase rotation
-        modes_S_shift[(ell, mm)] = {
-            "time": v["time"] + tau,                            # time shift
-            "h_lm": v["h_lm"] * rot,                          # complex strain
-    }
-
-    #-------------- """
-
     # Compute Match
     match_kwargs = dict(vec1 = h1, vec2 = h2, psd = psd, low_frequency_cutoff = f_lower, high_frequency_cutoff = f_high, return_phase = return_phase)
-    return optimized_match(**match_kwargs) if optimized else simple_match(**match_kwargs, subsample_interpolation = True)
+    return optimized_match(**match_kwargs)
+
+
+def match_modes(modes_A, modes_B, param_ext_A, param_ext_B, pol_A, pol_B, f_lower=f_min, f_high=f_max, delta_t=delta_T):
+
+    mode22_A = modes_A[(2,2)]["h_lm"]
+    time = modes_A[(2,2)]["time"]
+    # locate the sample of maximum amplitude
+    t_peak_A = time[np.argmax(np.abs(mode22_A))]
+
+    mode22_B = modes_B[(2,2)]["h_lm"]
+    time = modes_B[(2,2)]["time"]
+    # locate the sample of maximum amplitude
+    t_peak_B = time[np.argmax(np.abs(mode22_B))]
+
+
+    modes_B_shift = align_modes(modes_A, modes_B, t0=t_peak_A, t1=t_peak_B, 
+                      low_frequency_cutoff=f_lower, high_frequency_cutoff=f_high)
+
+    h_A = 0j
+    h_B = 0j
+
+    for (l, m) in modes_A.keys():
+        Ylm = lal.SpinWeightedSphericalHarmonic(param_ext_A["inclination"], param_ext_A["longAscNodes"], -2, l, m)
+        h_A += modes_A[(l, m)]["h_lm"]*Ylm
+
+    for (l, m) in modes_B_shift.keys():
+        Ylm = lal.SpinWeightedSphericalHarmonic(param_ext_B["inclination"], param_ext_B["longAscNodes"], -2, l, m)
+        h_B += modes_B_shift[(l, m)]["h_lm"]*Ylm
+
+    # Use the polarization to create a real signal
+    h_A = h_A.real * np.cos(2*pol_A) + h_A.imag * np.sin(2*pol_A)
+    h_B = h_B.real * np.cos(2*pol_B) + h_B.imag * np.sin(2*pol_B)
+
+    h_A = TimeSeries(h_A, delta_t = delta_t)
+    h_B = TimeSeries(h_B, delta_t = delta_t)
+
+    match, _ = perform_match(h_A, h_B, f_lower, f_high, return_phase=False)
+    return match

@@ -1,11 +1,10 @@
 import sys
 import math
-from pycbc.types import TimeSeries
 
-from match import perform_match
+from match import match_modes
 import global_variables as gl_var
-from Initial_Values import Approximant_opt, delta_T, f_min, f_max, Intrinsic_or_Extrinsic
-from Target import simulationTD, h_target, Info_target
+from Initial_Values import Approximant_template, mode_list_template, Intrinsic_or_Extrinsic
+from Target import simulationTD_modes, modes_target, Info_target
 
 
 def overlap(): 
@@ -21,17 +20,9 @@ def overlap():
         # Iterate over the target gravitational waves assigned to the current worker
 
         # Simulate the gravitational wave using the chosen approximant and parameters
-        hp, hc, time = simulationTD(Approximant_opt[gl_var.n_aprox_opt], Info[1]) 
-        hp, hc = TimeSeries(hp, delta_t=delta_T), TimeSeries(hc, delta_t=delta_T) 
-        # Compute the total strain using the polarization of the wave
-        h = hp * math.cos(2 * Info[2]) + hc * math.sin(2 * Info[2]) 
+        modes = simulationTD_modes(Approximant_template[gl_var.n_aprox_opt], mode_list_template, Info[1])
+        match = match_modes(modes, modes_target[gl_var.name_worker][i], Info[1].params_ext(), Info[1].params_ext(), Info[2], Info[2])
 
-        # Compute the match (overlap) between the waveforms of different approximants
-        match, _ = perform_match(
-            h_target[gl_var.name_worker][i], h, 
-            f_lower=f_min, f_high=f_max, 
-            optimized=False, return_phase=False
-)
         overlap.append(match)  # Append the match value to the overlap list
 
     return overlap

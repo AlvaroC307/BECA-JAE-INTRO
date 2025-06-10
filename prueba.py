@@ -1,5 +1,5 @@
-from match import align_modes, taper_and_pad_mode, perform_match
-
+from match import align_modes, perform_match
+from Target import taper_and_pad_mode
 import lalsimulation as lalsim
 import lal
 from classes import params
@@ -68,7 +68,7 @@ class params_variant: # Class with all the basic information mandatory to simula
 
 
     def __str__(self) -> str: # String to format how does print(params) work
-        return f"mass1: {self.m1} | mass2: {self.m2} | spin1: {self.s1x, self.s1y, self.s1z}| spin2: {self.s2x, self.s2y, self.s2z}, | distance: {self.distance}, |inclination: {self.inclination}, |phiRef: {self.phiRef}, |longAscNodes: {self.longAscNodes}, |eccentricity: {self.eccentricity}| meanPerAno: {self.meanPerAno}"
+        return f"mass1: {self.m1} | mass2: {self.m2} | spin1: {self.s1x, self.s1y, self.s1z}| spin2: {self.s2x, self.s2y, self.s2z}, | distance: {self.distance}, |phiRef: {self.phiRef}"
     
 
 
@@ -137,7 +137,7 @@ for (l, m) in mode_list_imr:
                 time_grid1,                      # original grid
                 ts.data.data.astype(np.complex128),
                 pad )
-        modes_A[(l, m)] = {"time": t_pad, "h_lm": h_pad, "mask": mask_phys1}
+        modes_A[(l, m)] = {"time": t_pad, "h_lm": h_pad}
 
 
 # Create the waveform parameters structure
@@ -179,7 +179,7 @@ for (l, m) in mode_list_seobnr:
                 time_grid2,                      # original grid
                 ts.data.data.astype(np.complex128),
                 pad )
-        modes_B[(l, m)] = {"time": t_pad, "h_lm": h_pad, "mask": mask_phys2}
+        modes_B[(l, m)] = {"time": t_pad, "h_lm": h_pad}
 
 
 
@@ -205,6 +205,8 @@ for (l, m) in modes_B_shift.keys():
     Ylm = lal.SpinWeightedSphericalHarmonic(incl, longascnodes, -2, l, m)
 
     h_B += modes_B_shift[(l, m)]["h_lm"]*Ylm
+
+
 
 
 hp_A=TimeSeries(h_A.real, delta_t=delta_T)

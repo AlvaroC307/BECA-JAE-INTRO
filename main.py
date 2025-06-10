@@ -9,7 +9,7 @@ from joblib import Parallel, delayed
 import indistinguishability as ind
 from Initial_Values import Intrinsic_or_Extrinsic
 from Target import Info_target
-from Initial_Values import Approximant_opt, n_workers
+from Initial_Values import Approximant_template, n_workers
 from classes import chirp_mass_function
 import global_variables as gl_var
 import optimization_functions as func
@@ -35,7 +35,7 @@ def Save_FF_Data(Fitting_Factor: list, Comp_time: list, prms_final: list, list_I
                         "incl", "longascnodes", "pol", "Q_0", "M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0", "Chi_1p_0",
                         "theta_1p_0", "Chi_2p_0", "theta_2p_0", "incl_0", "longascnodes_0", "pol_0"])
 
-        for Approximant_optimization in Approximant_opt:
+        for Approximant_optimization in Approximant_template:
             for j, Info in enumerate(list_Info_target):  # Save results for different target parameters
                 
                 csv_test.writerow([1 - Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1] / lal.MSUN_SI,
@@ -53,7 +53,7 @@ def Save_FF_Data(Fitting_Factor: list, Comp_time: list, prms_final: list, list_I
         csv_test.writerow(["FF", "T_comp", "Q", "M_c (solar masses)", "Chi_eff", "Chi_2z", "Chi_1p", "theta_1p", "Chi_2p", "theta_2p",
                            "Q_0", "M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0", "Chi_1p_0", "theta_1p_0", "Chi_2p_0", "theta_2p_0"])
 
-        for Approximant_optimization in Approximant_opt:
+        for Approximant_optimization in Approximant_template:
             for j, Info in enumerate(list_Info_target):  # Save results for different target parameters
                 csv_test.writerow([1 - Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1] / lal.MSUN_SI,
                                    prms_final[j][2], prms_final[j][3], prms_final[j][4], prms_final[j][5], prms_final[j][6], prms_final[j][7],
@@ -68,7 +68,7 @@ def Save_FF_Data(Fitting_Factor: list, Comp_time: list, prms_final: list, list_I
         csv_test.writerow(["FF", "T_comp", "Q", "M_c (solar masses)", "Chi_eff", "Chi_2z",
                            "Q_0", "M_c_0 (solar masses)", "Chi_eff_0", "Chi_2z_0"])
 
-        for Approximant_optimization in Approximant_opt:
+        for Approximant_optimization in Approximant_template:
             for j, Info in enumerate(list_Info_target):  # Save results for different target parameters
                 csv_test.writerow([1 - Fitting_Factor[j], Comp_time[j], prms_final[j][0], prms_final[j][1] / lal.MSUN_SI,
                                    prms_final[j][2], prms_final[j][3],
@@ -332,6 +332,8 @@ def main_optimization_full():
 
     #print(f"The match of the second optimization is: {max_match}. It took {time.time()-time_initial} seconds. Cpu: {gl_var.name_worker}")
 
+    print(prms_final)
+
     prms_initial = []
     for i in range(len(anglespin1_template)): # Create templates
         prms_initial.append([prms_final[0], prms_final[1], prms_final[2],
@@ -388,7 +390,7 @@ def main(name_worker:int): # Main Function. It executes main_optimization_full o
     target = []
 
     if Intrinsic_or_Extrinsic == "Extrinsic": # Perform optimization over all possible parameters
-        for i in range(len(Approximant_opt)): # Iterate over different approximations
+        for i in range(len(Approximant_template)): # Iterate over different approximations
             for Info in Info_target[gl_var.name_worker]: # Iterate over different targets
                 results = main_optimization_full() # Perform full optimization
                 Fitting_Factor.append(results[0])
@@ -403,7 +405,7 @@ def main(name_worker:int): # Main Function. It executes main_optimization_full o
             gl_var.n_target = 0 # Reset the target counter
 
     elif Intrinsic_or_Extrinsic == "Intrinsic": # Perform optimization over intrinsic parameters only
-        for i in range(len(Approximant_opt)): # Iterate over different approximations
+        for i in range(len(Approximant_template)): # Iterate over different approximations
             for Info in Info_target[gl_var.name_worker]: # Iterate over different targets
                 results = main_optimization_intrinsic() # Perform intrinsic optimization
                 Fitting_Factor.append(results[0])
@@ -418,7 +420,7 @@ def main(name_worker:int): # Main Function. It executes main_optimization_full o
             gl_var.n_target = 0 # Reset the target counter
 
     elif Intrinsic_or_Extrinsic == "Non-Precessing": # Perform optimization over intrinsic parameters only
-        for i in range(len(Approximant_opt)): # Iterate over different approximations
+        for i in range(len(Approximant_template)): # Iterate over different approximations
             for Info in Info_target[gl_var.name_worker]: # Iterate over different targets
                 results = main_optimization_non_precessing() # Perform intrinsic optimization
                 Fitting_Factor.append(results[0])
